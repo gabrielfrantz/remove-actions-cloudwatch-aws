@@ -1,0 +1,42 @@
+name: Remove SNS Actions from CloudWatch Alarms
+
+on:
+  workflow_dispatch:
+    inputs:
+      sns_topic_arn:
+        description: 'ARN do SNS Topic que deseja remover das actions'
+        required: true
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  remove-actions:
+    runs-on: ubuntu-latest
+    environment: aws-remover-sns
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install boto3
+        run: pip install boto3
+
+      - name: Run script to remove SNS actions
+        run: |
+          python remove_sns_actions.py "${{ github.event.inputs.sns_topic_arn }}"
+
