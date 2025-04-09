@@ -1,42 +1,46 @@
-name: Remove SNS Actions from CloudWatch Alarms
+name: Remover SNS Actions de Alarmes
 
 on:
   workflow_dispatch:
     inputs:
-      sns_topic_arn:
-        description: 'ARN do SNS Topic que deseja remover das actions'
+      sns_topic:
+        description: 'ARN do tópico SNS a remover das actions'
         required: true
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ROLE_PARAMETER: ${{ secrets.AWS_ROLE_TO_ASSUME }}
 
 jobs:
-  remove-actions:
+  remove-sns-actions:
     runs-on: ubuntu-latest
-    environment: aws-remover-sns
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout do código
+        uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials via OIDC
+      - name: Instalar AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+
+      - name: Obter ARN da Role via Parameter Store
+        id: ssm
+        run: |
+          ROLE=$(aws ssm get-parameter \
+            --name "$ROLE_PARAMETER" \
+            --region $AWS_REGION \
+            --query 'Parameter.Value' \
+            --output text)
+          echo "ROLE=$ROLE" >> $GITHUB_ENV
+
+      - name: Configurar credenciais AWS via OIDC
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ env.ROLE }}
+          role-session-name: github-actions
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-
-      - name: Install boto3
-        run: pip install boto3
-
-      - name: Run script to remove SNS actions
+      - name: Rodar script Python para remover ações
         run: |
-          python remove_sns_actions.py "${{ github.event.inputs.sns_topic_arn }}"
-
+          python remover_actions.py "${{ github.event.inputs.sns_topic }}"
