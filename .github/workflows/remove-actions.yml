@@ -6,6 +6,10 @@ on:
       sns_topic:
         description: 'ARN do tópico SNS a remover das actions'
         required: true
+      confirm:
+        description: 'Digite "s" para confirmar que deseja aplicar as alterações (caso contrário, será dry-run)'
+        required: true
+        default: 'n'
 
 jobs:
   remove-sns-actions:
