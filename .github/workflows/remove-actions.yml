@@ -32,4 +32,4 @@ jobs:
 
       - name: Rodar script Python para remover ações
         run: |
-          python main.py "${{ github.event.inputs.sns_topic }}"
+          python main.py "${{ github.event.inputs.sns_topic }}" "${{ github.event.inputs.confirm }}"
