@@ -14,11 +14,15 @@ env:
 jobs:
   remove-sns-actions:
     runs-on: ubuntu-latest
+    environment: aws-remover-sns
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
-
+      
+      - name: Verificar AWS CLI
+        run: aws --version
+        
       - name: Obter ARN da Role via Parameter Store
         id: ssm
         run: |
