@@ -22,22 +22,11 @@ jobs:
       
       - name: Verificar AWS CLI
         run: aws --version
-        
-      - name: Obter ARN da Role via Parameter Store
-        id: ssm
-        run: |
-          ROLE=$(aws ssm get-parameter \
-            --name "$ROLE_PARAMETER" \
-            --region $AWS_REGION \
-            --query 'Parameter.Value' \
-            --output text)
-          echo "ROLE=$ROLE" >> $GITHUB_ENV
 
-      - name: Configurar credenciais AWS via OIDC
+      - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ env.ROLE }}
-          role-session-name: github-actions
+          role-to-assume: ${{ env.ROLE_PARAMETER }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Rodar script Python para remover ações
