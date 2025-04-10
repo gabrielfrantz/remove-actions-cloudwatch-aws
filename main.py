@@ -1,7 +1,7 @@
 import boto3
 import sys
 
-def remove_sns_actions(topic_arn):
+def remove_sns_actions(topic_arn, confirm):
     cloudwatch = boto3.client('cloudwatch')
     paginator = cloudwatch.get_paginator('describe_alarms')
 
@@ -29,15 +29,12 @@ def remove_sns_actions(topic_arn):
         print("\nNenhum alarme será alterado.")
         return
 
-    confirm = input("\nDeseja aplicar essas alterações? (s/N): ").strip().lower()
-    if confirm != 's':
-        print("Operação cancelada.")
+    if confirm.strip().lower() != 's':
+        print("\n[DRY-RUN] As alterações NÃO foram aplicadas. Execute novamente com confirmação 's' para aplicar.")
         return
 
     print("\n[ATUALIZAÇÃO] Iniciando remoção real...")
-
     for alarm in alarms_to_update:
-        # Para cada alarme, itera em cada lista e remove as actions solicitadas, com log detalhado.
         for action_list_name in ['AlarmActions', 'OKActions', 'InsufficientDataActions']:
             actions = alarm.get(action_list_name, [])
             if topic_arn in actions:
@@ -45,7 +42,6 @@ def remove_sns_actions(topic_arn):
                 actions = [a for a in actions if a != topic_arn]
             alarm[action_list_name] = actions
 
-        # Prepara os parâmetros para atualização, somente adicionando campos opcionais se não forem None
         params = {
             'AlarmName': alarm['AlarmName'],
             'MetricName': alarm['MetricName'],
@@ -61,7 +57,6 @@ def remove_sns_actions(topic_arn):
             'ActionsEnabled': alarm.get('ActionsEnabled', True),
             'TreatMissingData': alarm.get('TreatMissingData', 'missing')
         }
-
         if alarm.get('Statistic') is not None:
             params['Statistic'] = alarm['Statistic']
         if alarm.get('ExtendedStatistic') is not None:
@@ -77,9 +72,10 @@ def remove_sns_actions(topic_arn):
         print(f"[INFO] Alarme '{alarm['AlarmName']}' atualizado.")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Uso: python main.py <sns_topic_arn>")
+    if len(sys.argv) < 3:
+        print("Uso: python main.py <sns_topic_arn> <confirm (s/N)>")
         sys.exit(1)
 
     topic_arn = sys.argv[1]
-    remove_sns_actions(topic_arn)
+    confirm = sys.argv[2]
+    remove_sns_actions(topic_arn, confirm)
