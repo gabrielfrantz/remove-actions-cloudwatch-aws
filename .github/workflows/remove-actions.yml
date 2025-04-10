@@ -11,6 +11,10 @@ jobs:
   remove-sns-actions:
     runs-on: ubuntu-latest
     environment: aws-remover-sns
+    
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout do código
