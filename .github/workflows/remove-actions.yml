@@ -12,10 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: aws-remover-sns
 
-    env: 
-      AWS_REGION: us-east-1
-      ROLE_PARAMETER: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -23,8 +19,8 @@ jobs:
       - name: Configurar credenciais AWS
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ env.ROLE_PARAMETER }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Rodar script Python para remover ações
         run: |
