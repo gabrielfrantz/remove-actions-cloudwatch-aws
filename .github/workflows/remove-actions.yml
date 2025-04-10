@@ -7,10 +7,6 @@ on:
         description: 'ARN do tópico SNS a remover das actions'
         required: true
 
-env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  ROLE_PARAMETER: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-
 jobs:
   remove-sns-actions:
     runs-on: ubuntu-latest
@@ -26,8 +22,8 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ env.ROLE_PARAMETER }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_ROLE_TO_ASSUME }}
 
       - name: Rodar script Python para remover ações
         run: |
