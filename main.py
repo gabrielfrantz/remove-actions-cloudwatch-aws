@@ -14,7 +14,7 @@ def remove_sns_actions(topic_arn):
                 if topic_arn in actions:
                     actions.remove(topic_arn)
                     changed = True
-                    print(f"[INFO] Removendo {topic_arn} de {action_list_name} em '{alarm['AlarmName']}'")
+                    print(f"[INFO] Removendo {topic_arn} de {action_list_name} no alarme '{alarm['AlarmName']}'")
                     alarm[action_list_name] = actions  # Atualiza na estrutura local
 
             if changed:
