@@ -20,21 +20,10 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Obter ARN da Role via Parameter Store
-        run: |
-          echo "Buscando ARN da Role em $ROLE_PARAMETER na região $AWS_REGION..."
-          ROLE=$(aws ssm get-parameter \
-            --name "$ROLE_PARAMETER" \
-            --region "$AWS_REGION" \
-            --query 'Parameter.Value' \
-            --output text)
-          echo "ROLE recuperado: $ROLE"
-          echo "ROLE=$ROLE" >> $GITHUB_ENV
-
       - name: Configurar credenciais AWS
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ env.ROLE }}
+          role-to-assume: ${{ env.ROLE_PARAMETER }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Rodar script Python para remover ações
