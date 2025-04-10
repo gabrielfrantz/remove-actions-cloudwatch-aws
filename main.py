@@ -16,7 +16,6 @@ def remove_sns_actions(topic_arn):
                 actions = alarm.get(action_list_name, [])
                 if topic_arn in actions:
                     changed = True
-<<<<<<< HEAD
 
             if changed:
                 print(f"- {alarm['AlarmName']}")
@@ -76,42 +75,6 @@ def remove_sns_actions(topic_arn):
 
         cloudwatch.put_metric_alarm(**params)
         print(f"[INFO] Alarme '{alarm['AlarmName']}' atualizado.")
-=======
-                    print(f"[INFO] Removendo {topic_arn} de {action_list_name} no alarme '{alarm['AlarmName']}'")
-                    alarm[action_list_name] = actions  # Atualiza na estrutura local
-
-            if changed:
-                # Monta os parâmetros dinamicamente
-                params = {
-                    'AlarmName': alarm['AlarmName'],
-                    'MetricName': alarm['MetricName'],
-                    'Namespace': alarm['Namespace'],
-                    'ComparisonOperator': alarm['ComparisonOperator'],
-                    'Threshold': alarm['Threshold'],
-                    'Period': alarm['Period'],
-                    'EvaluationPeriods': alarm['EvaluationPeriods'],
-                    'AlarmActions': alarm.get('AlarmActions', []),
-                    'OKActions': alarm.get('OKActions', []),
-                    'InsufficientDataActions': alarm.get('InsufficientDataActions', []),
-                    'Dimensions': alarm.get('Dimensions', []),
-                    'ActionsEnabled': alarm.get('ActionsEnabled', True),
-                    'TreatMissingData': alarm.get('TreatMissingData', 'missing')
-                }
-
-                # Campos opcionais (só adiciona se não for None)
-                if alarm.get('Statistic') is not None:
-                    params['Statistic'] = alarm['Statistic']
-                if alarm.get('ExtendedStatistic') is not None:
-                    params['ExtendedStatistic'] = alarm['ExtendedStatistic']
-                if alarm.get('DatapointsToAlarm') is not None:
-                    params['DatapointsToAlarm'] = alarm['DatapointsToAlarm']
-                if alarm.get('Unit') is not None:
-                    params['Unit'] = alarm['Unit']
-                if alarm.get('ThresholdMetricId') is not None:
-                    params['ThresholdMetricId'] = alarm['ThresholdMetricId']
-
-                cloudwatch.put_metric_alarm(**params)
->>>>>>> fe77f5812de3f01aca0dd7ee5936b8a42ea42337
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
