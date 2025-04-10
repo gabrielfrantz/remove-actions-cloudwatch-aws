@@ -7,7 +7,6 @@ def remove_sns_actions(topic_arn):
     paginator = cloudwatch.get_paginator('describe_alarms')
     for page in paginator.paginate():
         for alarm in page['MetricAlarms']:
-            actions_to_remove = []
             changed = False
 
             for action_list_name in ['AlarmActions', 'OKActions', 'InsufficientDataActions']:
@@ -16,31 +15,43 @@ def remove_sns_actions(topic_arn):
                     actions.remove(topic_arn)
                     changed = True
                     print(f"[INFO] Removendo {topic_arn} de {action_list_name} em '{alarm['AlarmName']}'")
-                alarm[action_list_name] = actions
+                    alarm[action_list_name] = actions  # Atualiza na estrutura local
 
             if changed:
-                cloudwatch.put_metric_alarm(
-                    AlarmName=alarm['AlarmName'],
-                    MetricName=alarm['MetricName'],
-                    Namespace=alarm['Namespace'],
-                    Statistic=alarm.get('Statistic'),
-                    Dimensions=alarm.get('Dimensions', []),
-                    Period=alarm['Period'],
-                    EvaluationPeriods=alarm['EvaluationPeriods'],
-                    Threshold=alarm['Threshold'],
-                    ComparisonOperator=alarm['ComparisonOperator'],
-                    AlarmActions=alarm.get('AlarmActions', []),
-                    OKActions=alarm.get('OKActions', []),
-                    InsufficientDataActions=alarm.get('InsufficientDataActions', []),
-                    ActionsEnabled=True,
-                    Unit=alarm.get('Unit'),
-                    TreatMissingData=alarm.get('TreatMissingData', 'missing'),
-                    DatapointsToAlarm=alarm.get('DatapointsToAlarm')
-                )
+                # Monta os parâmetros dinamicamente
+                params = {
+                    'AlarmName': alarm['AlarmName'],
+                    'MetricName': alarm['MetricName'],
+                    'Namespace': alarm['Namespace'],
+                    'ComparisonOperator': alarm['ComparisonOperator'],
+                    'Threshold': alarm['Threshold'],
+                    'Period': alarm['Period'],
+                    'EvaluationPeriods': alarm['EvaluationPeriods'],
+                    'AlarmActions': alarm.get('AlarmActions', []),
+                    'OKActions': alarm.get('OKActions', []),
+                    'InsufficientDataActions': alarm.get('InsufficientDataActions', []),
+                    'Dimensions': alarm.get('Dimensions', []),
+                    'ActionsEnabled': alarm.get('ActionsEnabled', True),
+                    'TreatMissingData': alarm.get('TreatMissingData', 'missing')
+                }
+
+                # Campos opcionais (só adiciona se não for None)
+                if alarm.get('Statistic') is not None:
+                    params['Statistic'] = alarm['Statistic']
+                if alarm.get('ExtendedStatistic') is not None:
+                    params['ExtendedStatistic'] = alarm['ExtendedStatistic']
+                if alarm.get('DatapointsToAlarm') is not None:
+                    params['DatapointsToAlarm'] = alarm['DatapointsToAlarm']
+                if alarm.get('Unit') is not None:
+                    params['Unit'] = alarm['Unit']
+                if alarm.get('ThresholdMetricId') is not None:
+                    params['ThresholdMetricId'] = alarm['ThresholdMetricId']
+
+                cloudwatch.put_metric_alarm(**params)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Uso: python remove_sns_actions.py <sns_topic_arn>")
+        print("Uso: python main.py <sns_topic_arn>")
         sys.exit(1)
 
     topic_arn = sys.argv[1]
