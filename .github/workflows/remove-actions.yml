@@ -19,10 +19,7 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
       
-      - name: Verificar AWS CLI
-        run: aws --version
-
-      - name: Configure AWS Credentials via OIDC
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
